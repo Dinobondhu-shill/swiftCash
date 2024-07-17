@@ -1,17 +1,39 @@
+import axios from "axios";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 
 const SignUp = () => {
 const [error, setError] = useState(null)
-const handleUserRegister = (e) =>{
+const [loading, setLoading] = useState(false);
+const navigate = useNavigate();
+const handleUserRegister =async (e) =>{
 e.preventDefault()
+setLoading(true);
 const form = e.target
 const name = form.name.value
 const email = form.email.value
-const phone = form.phone.value
+const mobileNumber = form.phone.value
 const pin = form.pin.value
-const data = {name, email, pin, phone}
-console.log(data)
+const role = 'user'
+const data = {name, email, pin, mobileNumber, role}
+
+try {
+  await axios.post('http://localhost:5000/register', data)
+  .then(result=>{
+    console.log(result.data);
+    alert('Registration successful!');
+    form.reset()
+    navigate('/login')
+
+  })
+}
+catch (error){
+  console.error('Error during login', error);
+}
+finally {
+  setLoading(false); // Set loading to false when the registration process is complete
+}
 }
 
 
@@ -49,11 +71,23 @@ return (
         }
         }}
         />
-        <p className="text-red-600">{error}</p>
       </div>
-      <input type="submit" value="Register" className="px-4 py-2 border bg-[#369D8B] rounded-lg" />
+      <p className="text-red-600">{error}</p>
+      <button type="submit" className="px-4 py-2 border bg-[#369D8B] rounded-lg" disabled={loading}>
+            {loading ? (
+              <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 01-16 0z"></path>
+              </svg>
+            ) : (
+              'Register'
+            )}
+          </button>
+      <p>Or, Sign up as an <Link to={'/agent-signup'} className="text-[#369D8B] underline"> Agent</Link></p>
+
     </div>
   </form>
+
 </div>
 );
 };
